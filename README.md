@@ -43,7 +43,7 @@ OAuth認証をするためには、
 （下記の xxxxxxxx... を書き換える）。これらの値を取得するためには
 https://dev.twitter.com/apps へのアプリケーション登録が必要です。
 
-```
+```perl
 # ====================
 sub twitter_oauth {  # 下記の値は https://dev.twitter.com/apps で取得すること
 $twit = Net::Twitter::Lite->new(
@@ -59,7 +59,7 @@ $twit = Net::Twitter::Lite->new(
 OAuth認証なしでも使える機能があります（詳細は各スクリプト内の説明を参照）。
 たとえば user_timeline.pl では、
 
-```
+```perl
 # OAuth認証（OAuth認証しない場合はコメントアウトする）
 my $twit ;
 twitter_oauth() ;
@@ -74,7 +74,7 @@ twitter_oauth() ;
 
 という部分があり、OAuth認証しない場合は
 
-```
+```perl
 # OAuth認証（OAuth認証しない場合はコメントアウトする）
 # my $twit ;
 # twitter_oauth() ;
@@ -98,9 +98,9 @@ my $twit = Net::Twitter::Lite->new() ;
 関連情報
 --------
 
-+ https://dev.twitter.com/docs/api -
++ https://dev.twitter.com/docs/api  
   Twitter REST APIの説明
-+ https://dev.twitter.com/apps -
++ https://dev.twitter.com/apps  
   Twitterのアプリケーション登録。OAuth認証に必要な値を取得できる
 
 
