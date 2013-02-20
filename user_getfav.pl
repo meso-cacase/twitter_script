@@ -91,7 +91,7 @@ sub favorites {  # Usage: @favs = favorites($since_id,$max_id,$count,$user_id) ;
 my %arg ;
 $_[0] and $arg{'since_id'} = $_[0] ;  # ステータスIDが指定した値より大きいツイートのみ取得するオプション
 $_[1] and $arg{'max_id'}   = $_[1] ;  # ステータスIDが指定した値以下のツイートのみ取得するオプション
-$arg{'count'} = $_[2] || 200 ;        # 取得するツイート数の最大値。省略時は200（Twitter APIの上限値）
+$arg{'count'} = $_[2] // 200 ;        # 取得するツイート数の最大値。省略時は200（Twitter APIの上限値）
 if ($_[3] and $_[3] =~ /^\d+$/){      # 指定したユーザのツイートを取得するオプション
 	$arg{'user_id'} = $_[3] ;         # 整数 → user_id
 } elsif ($_[3]){
@@ -102,12 +102,12 @@ my @tweet_tsv ;
 
 my $timeline_ref = $twit->favorites({%arg}) ;
 foreach (@$timeline_ref){
-	my $tweet_time      = $_->{'created_at'}            || '' ;
-	my $tweet_id        = $_->{'id'}                    || '' ;
-	my $tweet_text      = $_->{'text'}                  || '' ;
-	my $tweet_source    = $_->{'source'}                || '' ;
-	my $tweet_replyto   = $_->{'in_reply_to_status_id'} || '' ;
-	my $user_screenname = $_->{'user'}{'screen_name'}   || '' ;
+	my $tweet_time      = $_->{'created_at'}            // '' ;
+	my $tweet_id        = $_->{'id'}                    // '' ;
+	my $tweet_text      = $_->{'text'}                  // '' ;
+	my $tweet_source    = $_->{'source'}                // '' ;
+	my $tweet_replyto   = $_->{'in_reply_to_status_id'} // '' ;
+	my $user_screenname = $_->{'user'}{'screen_name'}   // '' ;
 
 	# ローカル時間帯での日付時刻に変換し、整形して出力
 	$tweet_time =~ s/\+0000/UTC/ ;

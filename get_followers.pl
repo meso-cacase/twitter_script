@@ -73,12 +73,12 @@ my $user_id_list = join ',', @_ ;
 my $user_ref = $twit->lookup_users({ user_id => $user_id_list }) ;
 my @user_info ;
 foreach (@$user_ref){
-	my $screen_name       = $_->{'screen_name'}       || '' ;
-	my $name              = $_->{'name'}              || '' ;
-	my $location          = $_->{'location'}          || '' ;
-	my $description       = $_->{'description'}       || '' ;
-	my $url               = $_->{'url'}               || '' ;
-	my $profile_image_url = $_->{'profile_image_url'} || '' ;
+	my $screen_name       = $_->{'screen_name'}       // '' ;
+	my $name              = $_->{'name'}              // '' ;
+	my $location          = $_->{'location'}          // '' ;
+	my $description       = $_->{'description'}       // '' ;
+	my $url               = $_->{'url'}               // '' ;
+	my $profile_image_url = $_->{'profile_image_url'} // '' ;
 
 	# 改行やタブをスペースに置換
 	$name        =~ s/[\n\r\t]/ /g ;

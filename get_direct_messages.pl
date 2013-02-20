@@ -90,7 +90,7 @@ sub get_direct_messages {  # Usage: @timeline = get_direct_messages($since_id,$m
 my %arg ;
 $_[0] and $arg{'since_id'} = $_[0] ;  # ステータスIDが指定した値より大きいメッセージのみ取得するオプション
 $_[1] and $arg{'max_id'}   = $_[1] ;  # ステータスIDが指定した値以下のメッセージのみ取得するオプション
-$arg{'count'} = $_[2] || 200 ;        # 取得するメッセージ数の最大値。省略時は200（Twitter APIの上限値）
+$arg{'count'} = $_[2] // 200 ;        # 取得するメッセージ数の最大値。省略時は200（Twitter APIの上限値）
 my @tweet_tsv ;
 
 my $timeline_ref = ($sent) ?
@@ -98,11 +98,11 @@ my $timeline_ref = ($sent) ?
 	($twit->direct_messages({%arg})) ;
 
 foreach (@$timeline_ref){
-	my $tweet_time = $_->{'created_at'}            || '' ;
-	my $tweet_id   = $_->{'id'}                    || '' ;
-	my $tweet_text = $_->{'text'}                  || '' ;
-	my $sender     = $_->{'sender_screen_name'}    || '' ;
-	my $recipient  = $_->{'recipient_screen_name'} || '' ;
+	my $tweet_time = $_->{'created_at'}            // '' ;
+	my $tweet_id   = $_->{'id'}                    // '' ;
+	my $tweet_text = $_->{'text'}                  // '' ;
+	my $sender     = $_->{'sender_screen_name'}    // '' ;
+	my $recipient  = $_->{'recipient_screen_name'} // '' ;
 
 	# ローカル時間帯での日付時刻に変換し、整形して出力
 	$tweet_time =~ s/\+0000/UTC/ ;
