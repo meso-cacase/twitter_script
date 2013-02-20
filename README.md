@@ -47,10 +47,10 @@ https://dev.twitter.com/apps へのアプリケーション登録が必要です
 # ====================
 sub twitter_oauth {  # 下記の値は https://dev.twitter.com/apps で取得すること
 $twit = Net::Twitter::Lite->new(
-	consumer_key => 'xxxxxxxxxxxxxxxxxxxx',
-	consumer_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token_secret =>'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  consumer_key        => 'xxxxxxxxxxxxxxxxxxxx',
+  consumer_secret     => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+  access_token        => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+  access_token_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 ) ;
 } ;
 # ====================
@@ -107,7 +107,7 @@ my $twit = Net::Twitter::Lite->new() ;
 ライセンス
 --------
 
-Copyright &copy; 2011-2012 Yuki Naito
+Copyright &copy; 2011-2013 Yuki Naito
  ([@meso_cacase](http://twitter.com/meso_cacase))  
-This software is distributed under modified BSD license
- (http://www.opensource.org/licenses/bsd-license.php)
+This software is distributed under [modified BSD license]
+ (http://www.opensource.org/licenses/bsd-license.php).

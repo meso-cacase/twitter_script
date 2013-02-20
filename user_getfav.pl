@@ -26,7 +26,7 @@
 # 認証に必要な consumer_key, consumer_secret, access_token, access_token_secret
 # を取得し、ソース内の twitter_oauth サブルーチン内に記載すること
 #
-# 2012-07-11.meso_cacase
+# 2012-07-11 Yuki Naito (@meso_cacase)
 
 use warnings ;
 use strict ;
@@ -34,24 +34,24 @@ use Getopt::Long ;
 use Math::BigInt ;
 eval 'use Net::Twitter::Lite ; 1' or  # Twitter API用モジュール、ない場合はエラー表示
 	die "ERROR : cannot load Net::Twitter::Lite\n" ;
-eval 'use HTTP::Date ; 1' or  # 日時の変換・フォーマット用、ない場合はエラー表示
+eval 'use HTTP::Date ; 1' or          # 日時の変換・フォーマット用、ない場合はエラー表示
 	die "ERROR : cannot load HTTP::Date\n" ;
-eval 'use Encode ; 1' or  # 文字コード変換、ない場合はエラー表示
+eval 'use Encode ; 1' or              # 文字コード変換、ない場合はエラー表示
 	die "ERROR : cannot load Encode\n" ;
 
 # コマンドラインオプションを取得
-my $user_id = '' ;  # デフォルトは空
+my $user_id  = '' ;  # デフォルトは空
 my $since_id = '' ;  # デフォルトは空
-my $max_id = '' ;  # デフォルトは空
+my $max_id   = '' ;  # デフォルトは空
 GetOptions(
-	'user=s' => \$user_id,
+	'user=s'  => \$user_id,
 	'since=s' => \$since_id,
-	'max=s' => \$max_id,
+	'max=s'   => \$max_id,
 ) ;
 # 【補足】since_id と max_id は整数なので本来 since=i や max=i で取得すべきだが、
 # 値が大きすぎて浮動小数点に変換されてしまうため文字列として取得しパタンチェックする
 $since_id and not $since_id =~ /^\d+$/ and die "since_id must be number.\n" ;
-$max_id and not $max_id =~ /^\d+$/ and die "max_id must be number.\n" ;
+$max_id   and not $max_id   =~ /^\d+$/ and die "max_id must be number.\n" ;
 
 # OAuth認証（OAuth認証しない場合はコメントアウトする）
 my $twit ;
@@ -70,7 +70,7 @@ while (my @favs = favorites($since_id,$max_id,50,$user_id)){
 	my $last_id = (split /\t/, $favs[-1])[0] ;
 	$max_id = Math::BigInt->new($last_id) - 1 ;  # 桁数が多いのでBigIntで処理する
 	$max_id = "$max_id" ;  # 数値から文字列に変換（整数が浮動小数点に変換されるのを防ぐ）
-	$" = "\n" ;  #"
+	$" = "\n" ;
 	print "@favs\n" ;
 	print STDERR "Fetched: since_id=$since_id,max_id=$max_id,tweets=", scalar @favs, "\n" ;
 }
@@ -80,34 +80,34 @@ exit ;
 # ====================
 sub twitter_oauth {  # 下記の値は https://dev.twitter.com/apps で取得すること
 $twit = Net::Twitter::Lite->new(
-	consumer_key => 'xxxxxxxxxxxxxxxxxxxx',
-	consumer_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token_secret =>'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+	consumer_key        => 'xxxxxxxxxxxxxxxxxxxx',
+	consumer_secret     => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token        => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 ) ;
 } ;
 # ====================
 sub favorites {  # Usage: @favs = favorites($since_id,$max_id,$count,$user_id) ;
 my %arg ;
 $_[0] and $arg{'since_id'} = $_[0] ;  # ステータスIDが指定した値より大きいツイートのみ取得するオプション
-$_[1] and $arg{'max_id'} = $_[1] ;  # ステータスIDが指定した値以下のツイートのみ取得するオプション
-$arg{'count'} = $_[2] || 200 ;  # 取得するツイート数の最大値。省略時は200（Twitter APIの上限値）
-if ($_[3] and $_[3] =~ /^\d+$/){  # 指定したユーザのツイートを取得するオプション
-	$arg{'user_id'} = $_[3] ;  # 整数 → user_id
+$_[1] and $arg{'max_id'}   = $_[1] ;  # ステータスIDが指定した値以下のツイートのみ取得するオプション
+$arg{'count'} = $_[2] || 200 ;        # 取得するツイート数の最大値。省略時は200（Twitter APIの上限値）
+if ($_[3] and $_[3] =~ /^\d+$/){      # 指定したユーザのツイートを取得するオプション
+	$arg{'user_id'} = $_[3] ;         # 整数 → user_id
 } elsif ($_[3]){
-	$arg{'screen_name'} = $_[3] ;  # それ以外 → screen_name
+	$arg{'screen_name'} = $_[3] ;     # それ以外 → screen_name
 }
 
 my @tweet_tsv ;
 
 my $timeline_ref = $twit->favorites({%arg}) ;
 foreach (@$timeline_ref){
-	my $tweet_time = $_->{'created_at'} || '' ;
-	my $tweet_id = $_->{'id'} || '' ;
-	my $tweet_text = $_->{'text'} || '' ;
-	my $tweet_source = $_->{'source'} || '' ;
-	my $tweet_replyto = $_->{'in_reply_to_status_id'} || '' ;
-	my $user_screenname = $_->{'user'}{'screen_name'} || '' ;
+	my $tweet_time      = $_->{'created_at'}            || '' ;
+	my $tweet_id        = $_->{'id'}                    || '' ;
+	my $tweet_text      = $_->{'text'}                  || '' ;
+	my $tweet_source    = $_->{'source'}                || '' ;
+	my $tweet_replyto   = $_->{'in_reply_to_status_id'} || '' ;
+	my $user_screenname = $_->{'user'}{'screen_name'}   || '' ;
 
 	# ローカル時間帯での日付時刻に変換し、整形して出力
 	$tweet_time =~ s/\+0000/UTC/ ;

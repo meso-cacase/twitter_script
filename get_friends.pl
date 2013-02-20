@@ -15,13 +15,13 @@
 # consumer_key, consumer_secret, access_token, access_token_secret を取得し、
 # ソース内の twitter_oauth サブルーチン内に記載すること
 #
-# 2011-09-13.meso_cacase
+# 2011-09-13 Yuki Naito (@meso_cacase)
 
 use warnings ;
 use strict ;
 eval 'use Net::Twitter::Lite ; 1' or  # Twitter API用モジュール、ない場合はエラー表示
 	die "ERROR : cannot load Net::Twitter::Lite\n" ;
-eval 'use Encode ; 1' or  # 文字コード変換、ない場合はエラー表示
+eval 'use Encode ; 1' or              # 文字コード変換、ない場合はエラー表示
 	die "ERROR : cannot load Encode\n" ;
 
 # OAuth認証
@@ -35,7 +35,7 @@ my @ids = get_friends($ARGV[0]) ;
 # 100件ごとに分割して取得
 while (my @ids_100 = splice(@ids,0,100)){
 	my @users = users_lookup(@ids_100) ;
-	$" = "\n" ;  #"
+	$" = "\n" ;
 	print "@users\n" ;
 }
 
@@ -44,10 +44,10 @@ exit ;
 # ====================
 sub twitter_oauth {  # 下記の値は https://dev.twitter.com/apps で取得すること
 $twit = Net::Twitter::Lite->new(
-	consumer_key => 'xxxxxxxxxxxxxxxxxxxx',
-	consumer_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token_secret =>'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+	consumer_key        => 'xxxxxxxxxxxxxxxxxxxx',
+	consumer_secret     => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token        => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 ) ;
 } ;
 # ====================
@@ -73,16 +73,16 @@ my $user_id_list = join ',', @_ ;
 my $user_ref = $twit->lookup_users({ user_id => $user_id_list }) ;
 my @user_info ;
 foreach (@$user_ref){
-	my $screen_name = $_->{'screen_name'} || '' ;
-	my $name = $_->{'name'} || '' ;
-	my $location = $_->{'location'} || '' ;
-	my $description = $_->{'description'} || '' ;
-	my $url = $_->{'url'} || '' ;
+	my $screen_name       = $_->{'screen_name'}       || '' ;
+	my $name              = $_->{'name'}              || '' ;
+	my $location          = $_->{'location'}          || '' ;
+	my $description       = $_->{'description'}       || '' ;
+	my $url               = $_->{'url'}               || '' ;
 	my $profile_image_url = $_->{'profile_image_url'} || '' ;
 
 	# 改行やタブをスペースに置換
-	$name =~ s/[\n\r\t]/ /g ;
-	$location =~ s/[\n\r\t]/ /g ;
+	$name        =~ s/[\n\r\t]/ /g ;
+	$location    =~ s/[\n\r\t]/ /g ;
 	$description =~ s/[\n\r\t]/ /g ;
 
 	my $userinfo = "$screen_name	$name	$location	$description	$url	$profile_image_url" ;
