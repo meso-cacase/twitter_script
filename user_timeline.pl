@@ -87,7 +87,7 @@ $twit = Net::Twitter::Lite->new(
 ) ;
 } ;
 # ====================
-sub get_user_timeline {  # Usage: @timeline = get_timeline($since_id,$max_id,$count,$user_id) ;
+sub get_user_timeline {  # Usage: @timeline = get_user_timeline($since_id,$max_id,$count,$user_id) ;
 my %arg ;
 $_[0] and $arg{'since_id'} = $_[0] ;  # ステータスIDが指定した値より大きいツイートのみ取得するオプション
 $_[1] and $arg{'max_id'}   = $_[1] ;  # ステータスIDが指定した値以下のツイートのみ取得するオプション
