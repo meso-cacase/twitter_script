@@ -16,6 +16,7 @@
 # ソース内の twitter_oauth サブルーチン内に記載すること
 #
 # 2011-08-31 Yuki Naito (@meso_cacase)
+# 2013-06-12 Yuki Naito (@meso_cacase) Twitter API v1.1に対応
 
 use warnings ;
 use strict ;
@@ -33,7 +34,7 @@ my @ids = get_followers($ARGV[0]) ;
 
 # ユーザリストに変換
 # 100件ごとに分割して取得
-while (my @ids_100 = splice(@ids,0,100)){
+while (my @ids_100 = splice(@ids, 0, 100)){
 	my @users = users_lookup(@ids_100) ;
 	$" = "\n" ;
 	print "@users\n" ;
@@ -44,10 +45,14 @@ exit ;
 # ====================
 sub twitter_oauth {  # 下記の値は https://dev.twitter.com/apps で取得すること
 $twit = Net::Twitter::Lite->new(
-	consumer_key        => 'xxxxxxxxxxxxxxxxxxxx',
-	consumer_secret     => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token        => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+	apiurl                => 'http://api.twitter.com/1.1',
+	searchapiurl          => 'http://api.twitter.com/1.1/search',
+	search_trends_api_url => 'http://api.twitter.com/1.1',
+	lists_api_url         => 'http://api.twitter.com/1.1',
+	consumer_key          => 'xxxxxxxxxxxxxxxxxxxx',
+	consumer_secret       => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token          => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token_secret   => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 ) ;
 } ;
 # ====================
@@ -85,8 +90,16 @@ foreach (@$user_ref){
 	$location    =~ s/[\n\r\t]/ /g ;
 	$description =~ s/[\n\r\t]/ /g ;
 
-	my $userinfo = "$screen_name	$name	$location	$description	$url	$profile_image_url" ;
-	Encode::is_utf8($userinfo) and $userinfo = Encode::encode('utf-8',$userinfo) ;
+	my $userinfo = join "\t", (
+		$screen_name,
+		$name,
+		$location,
+		$description,
+		$url,
+		$profile_image_url
+	) ;
+
+	Encode::is_utf8($userinfo) and $userinfo = Encode::encode('utf-8', $userinfo) ;
 	push @user_info, $userinfo ;
 }
 return @user_info ;

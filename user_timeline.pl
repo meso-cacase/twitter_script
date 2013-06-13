@@ -7,12 +7,11 @@
 # Options:
 # -u USER_ID, --user=USER_ID
 #     USER_ID（数値またはscreen name）で指定したユーザのツイートを取得する
-#     省略時は、OAuthで認証した場合は自分自身のツイートを取得する
-#     OAuth認証しない場合は省略するとエラーになる
+#     省略時は、OAuthで認証した本人のツイートを取得する
 # -s SINCE_ID, --since=SINCE_ID
 #     SINCE_ID（数値）よりステータスIDが大きい（つまり新しい）ツイートを取得する
 #     更新時などはこの値を指定すると所得済のツイートを転送しなくてすむ
-#     省略時は遡れるかぎりツイートを取得する（2011年8月現在約3200件まで）
+#     省略時は遡れるかぎりツイートを取得する（2013年6月現在約3200件まで）
 # -m MAX_ID, --max=MAX_ID
 #     MAX_ID（数値）以下のステータスIDをもつ（つまり古い）ツイートを取得する
 #     省略時は現在までのツイートを取得する
@@ -27,6 +26,7 @@
 # を取得し、ソース内の twitter_oauth サブルーチン内に記載すること
 #
 # 2011-08-14 Yuki Naito (@meso_cacase)
+# 2013-06-12 Yuki Naito (@meso_cacase) Twitter API v1.1に対応
 
 use warnings ;
 use strict ;
@@ -53,20 +53,13 @@ GetOptions(
 $since_id and not $since_id =~ /^\d+$/ and die "since_id must be number.\n" ;
 $max_id   and not $max_id   =~ /^\d+$/ and die "max_id must be number.\n" ;
 
-# OAuth認証（OAuth認証しない場合はコメントアウトする）
+# OAuth認証（API v1.1から必須となった）
 my $twit ;
 twitter_oauth() ;
 
-# OAuth認証しない場合（OAuth認証する場合はコメントアウトする）
-# my $twit = Net::Twitter::Lite->new() ;
-#
-# 【説明】user_timelineはOAuth認証なしでも取得可。ただしAPI制限が異なる
-# OAuth認証した場合は毎時350リクエストまで（2011年8月現在）
-# OAuth認証しない場合は毎時150リクエストまで（2011年8月現在）
-
 # 特定ユーザのツイートを取得
 # 一度に取得できないので、$max_idを書き換えながら取得を繰り返す
-while (my @timeline = get_user_timeline($since_id,$max_id,50,$user_id)){
+while (my @timeline = get_user_timeline($since_id, $max_id, 200, $user_id)){
 	my $last_id = (split /\t/, $timeline[-1])[0] ;
 	$max_id = Math::BigInt->new($last_id) - 1 ;  # 桁数が多いのでBigIntで処理する
 	$max_id = "$max_id" ;  # 数値から文字列に変換（整数が浮動小数点に変換されるのを防ぐ）
@@ -80,14 +73,18 @@ exit ;
 # ====================
 sub twitter_oauth {  # 下記の値は https://dev.twitter.com/apps で取得すること
 $twit = Net::Twitter::Lite->new(
-	consumer_key        => 'xxxxxxxxxxxxxxxxxxxx',
-	consumer_secret     => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token        => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+	apiurl                => 'http://api.twitter.com/1.1',
+	searchapiurl          => 'http://api.twitter.com/1.1/search',
+	search_trends_api_url => 'http://api.twitter.com/1.1',
+	lists_api_url         => 'http://api.twitter.com/1.1',
+	consumer_key          => 'xxxxxxxxxxxxxxxxxxxx',
+	consumer_secret       => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token          => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token_secret   => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 ) ;
 } ;
 # ====================
-sub get_user_timeline {  # Usage: @timeline = get_user_timeline($since_id,$max_id,$count,$user_id) ;
+sub get_user_timeline {  # Usage: @timeline = get_user_timeline($since_id, $max_id, $count, $user_id) ;
 my %arg ;
 $_[0] and $arg{'since_id'} = $_[0] ;  # ステータスIDが指定した値より大きいツイートのみ取得するオプション
 $_[1] and $arg{'max_id'}   = $_[1] ;  # ステータスIDが指定した値以下のツイートのみ取得するオプション
@@ -120,8 +117,16 @@ foreach (@$timeline_ref){
 	# クライアント名に含まれるリンクを除去
 	$tweet_source =~ s/<.*?>//g ;
 
-	my $tweet = "$tweet_id	$tweet_time	$user_screenname	$tweet_text	$tweet_replyto	$tweet_source" ;
-	Encode::is_utf8($tweet) and $tweet = Encode::encode('utf-8',$tweet) ;
+	my $tweet = join "\t", (
+		$tweet_id,
+		$tweet_time,
+		$user_screenname,
+		$tweet_text,
+		$tweet_replyto,
+		$tweet_source
+	) ;
+
+	Encode::is_utf8($tweet) and $tweet = Encode::encode('utf-8', $tweet) ;
 	push @tweet_tsv, $tweet ;
 }
 return @tweet_tsv ;

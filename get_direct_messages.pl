@@ -15,7 +15,7 @@
 # -s SINCE_ID, --since=SINCE_ID
 #     SINCE_ID（数値）よりステータスIDが大きい（つまり新しい）メッセージを取得する
 #     更新時などはこの値を指定すると所得済のメッセージを転送しなくてすむ
-#     省略時は遡れるかぎりメッセージを取得する
+#     省略時は遡れるかぎりメッセージを取得する（2013年6月現在約800件まで）
 # -m MAX_ID, --max=MAX_ID
 #     MAX_ID（数値）以下のステータスIDをもつ（つまり古い）メッセージを取得する
 #     省略時は現在までのメッセージを取得する
@@ -33,6 +33,7 @@
 # の権限が付与されたトークンを取得する必要がある
 #
 # 2011-08-15 Yuki Naito (@meso_cacase)
+# 2013-06-12 Yuki Naito (@meso_cacase) Twitter API v1.1に対応
 
 use warnings ;
 use strict ;
@@ -46,9 +47,9 @@ eval 'use Encode ; 1' or              # 文字コード変換、ない場合は�
 	die "ERROR : cannot load Encode\n" ;
 
 # コマンドラインオプションを取得
-my $since_id = '' ;  # デフォルトは空
-my $max_id   = '' ;  # デフォルトは空
-my $sent     = '' ;  # デフォルトは空
+my $since_id = '' ;
+my $max_id   = '' ;
+my $sent     = '' ;
 GetOptions(
 	'since=s' => \$since_id,
 	'max=s'   => \$max_id,
@@ -65,7 +66,7 @@ twitter_oauth() ;
 
 # ダイレクトメッセージを取得
 # 一度に取得できないので、$max_idを書き換えながら取得を繰り返す
-while (my @timeline = get_direct_messages($since_id,$max_id,'')){
+while (my @timeline = get_direct_messages($since_id, $max_id)){
 	my $last_id = (split /\t/, $timeline[-1])[0] ;
 	$max_id = Math::BigInt->new($last_id) - 1 ;  # 桁数が多いのでBigIntで処理する
 	$max_id = "$max_id" ;  # 数値から文字列に変換（整数が浮動小数点に変換されるのを防ぐ）
@@ -79,14 +80,18 @@ exit ;
 # ====================
 sub twitter_oauth {  # 下記の値は https://dev.twitter.com/apps で取得すること
 $twit = Net::Twitter::Lite->new(
-	consumer_key        => 'xxxxxxxxxxxxxxxxxxxx',
-	consumer_secret     => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token        => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+	apiurl                => 'http://api.twitter.com/1.1',
+	searchapiurl          => 'http://api.twitter.com/1.1/search',
+	search_trends_api_url => 'http://api.twitter.com/1.1',
+	lists_api_url         => 'http://api.twitter.com/1.1',
+	consumer_key          => 'xxxxxxxxxxxxxxxxxxxx',
+	consumer_secret       => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token          => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token_secret   => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 ) ;
 } ;
 # ====================
-sub get_direct_messages {  # Usage: @timeline = get_direct_messages($since_id,$max_id,$count) ;
+sub get_direct_messages {  # Usage: @timeline = get_direct_messages($since_id, $max_id, $count) ;
 my %arg ;
 $_[0] and $arg{'since_id'} = $_[0] ;  # ステータスIDが指定した値より大きいメッセージのみ取得するオプション
 $_[1] and $arg{'max_id'}   = $_[1] ;  # ステータスIDが指定した値以下のメッセージのみ取得するオプション
@@ -112,8 +117,14 @@ foreach (@$timeline_ref){
 	# メッセージ内の改行やタブをスペースに置換
 	$tweet_text =~ s/[\n\r\t]/ /g ;
 
-	my $tweet = "$tweet_id	$tweet_time	$sender	D $recipient $tweet_text" ;
-	Encode::is_utf8($tweet) and $tweet = Encode::encode('utf-8',$tweet) ;
+	my $tweet = join "\t", (
+		$tweet_id,
+		$tweet_time,
+		$sender,
+		"D $recipient $tweet_text"
+	) ;
+
+	Encode::is_utf8($tweet) and $tweet = Encode::encode('utf-8', $tweet) ;
 	push @tweet_tsv, $tweet ;
 }
 return @tweet_tsv ;
