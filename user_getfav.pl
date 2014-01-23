@@ -17,7 +17,7 @@
 #     省略時は現在までのfavoritesを取得する
 #
 # 必要なモジュール：
-# Net::Twitter::Lite
+# Net::Twitter::Lite::WithAPIv1_1
 # HTTP::Date
 # Encode
 #
@@ -27,16 +27,17 @@
 #
 # 2012-07-11 Yuki Naito (@meso_cacase)
 # 2013-06-12 Yuki Naito (@meso_cacase) Twitter API v1.1に対応できず
+# 2014-01-23 Yuki Naito (@meso_cacase) Net::Twitter::Lite::WithAPIv1_1に乗り換え
 
 use warnings ;
 use strict ;
 use Getopt::Long ;
 use Math::BigInt ;
-eval 'use Net::Twitter::Lite ; 1' or  # Twitter API用モジュール、ない場合はエラー表示
-	die "ERROR : cannot load Net::Twitter::Lite\n" ;
-eval 'use HTTP::Date ; 1' or          # 日時の変換・フォーマット用、ない場合はエラー表示
+eval 'use Net::Twitter::Lite::WithAPIv1_1 ; 1' or  # Twitter APIモジュール
+	die "ERROR : cannot load Net::Twitter::Lite::WithAPIv1_1\n" ;
+eval 'use HTTP::Date ; 1' or                       # 日時の変換・フォーマット
 	die "ERROR : cannot load HTTP::Date\n" ;
-eval 'use Encode ; 1' or              # 文字コード変換、ない場合はエラー表示
+eval 'use Encode ; 1' or                           # 文字コード変換
 	die "ERROR : cannot load Encode\n" ;
 
 # コマンドラインオプションを取得
@@ -59,7 +60,7 @@ twitter_oauth() ;
 
 # 特定ユーザのツイートを取得
 # 一度に取得できないので、$max_idを書き換えながら取得を繰り返す
-while (my @favs = favorites($since_id, $max_id, 50, $user_id)){
+while (my @favs = favorites($since_id, $max_id, 200, $user_id)){
 	my $last_id = (split /\t/, $favs[-1])[0] ;
 	$max_id = Math::BigInt->new($last_id) - 1 ;  # 桁数が多いのでBigIntで処理する
 	$max_id = "$max_id" ;  # 数値から文字列に変換（整数が浮動小数点に変換されるのを防ぐ）
@@ -72,15 +73,12 @@ exit ;
 
 # ====================
 sub twitter_oauth {  # 下記の値は https://dev.twitter.com/apps で取得すること
-$twit = Net::Twitter::Lite->new(
-	apiurl                => 'http://api.twitter.com/1.1',
-	searchapiurl          => 'http://api.twitter.com/1.1/search',
-	search_trends_api_url => 'http://api.twitter.com/1.1',
-	lists_api_url         => 'http://api.twitter.com/1.1',
-	consumer_key          => 'xxxxxxxxxxxxxxxxxxxx',
-	consumer_secret       => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token          => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token_secret   => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+$twit = Net::Twitter::Lite::WithAPIv1_1->new(
+	consumer_key        => 'xxxxxxxxxxxxxxxxxxxx',
+	consumer_secret     => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token        => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	ssl                 => 1
 ) ;
 } ;
 # ====================

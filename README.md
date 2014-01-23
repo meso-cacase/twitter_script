@@ -34,7 +34,7 @@ Twitter APIを利用してツイートやフォロワーの一覧などを取得
 
 使い方やコマンドオプションは各スクリプト内に書かれています。
 
-OAuth認証をするためには、
+OAuth認証をするために、
  `consumer_key`,
  `consumer_secret`,
  `access_token`,
@@ -46,53 +46,16 @@ https://dev.twitter.com/apps へのアプリケーション登録が必要です
 ```perl
 # ====================
 sub twitter_oauth {  # 下記の値は https://dev.twitter.com/apps で取得すること
-$twit = Net::Twitter::Lite->new(
-  consumer_key        => 'xxxxxxxxxxxxxxxxxxxx',
-  consumer_secret     => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-  access_token        => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-  access_token_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+$twit = Net::Twitter::Lite::WithAPIv1_1->new(
+	consumer_key        => 'xxxxxxxxxxxxxxxxxxxx',
+	consumer_secret     => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token        => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	ssl                 => 1
 ) ;
 } ;
 # ====================
 ```
-
-OAuth認証なしでも使える機能があります（詳細は各スクリプト内の説明を参照）。
-たとえば user_timeline.pl では、
-
-```perl
-# OAuth認証（OAuth認証しない場合はコメントアウトする）
-my $twit ;
-twitter_oauth() ;
-
-# OAuth認証しない場合（OAuth認証する場合はコメントアウトする）
-# my $twit = Net::Twitter::Lite->new() ;
-#
-# 【説明】user_timelineはOAuth認証なしでも取得可。ただしAPI制限が異なる
-# OAuth認証した場合は毎時350リクエストまで（2011年8月現在）
-# OAuth認証しない場合は毎時150リクエストまで（2011年8月現在）
-```
-
-という部分があり、OAuth認証しない場合は
-
-```perl
-# OAuth認証（OAuth認証しない場合はコメントアウトする）
-# my $twit ;
-# twitter_oauth() ;
-
-# OAuth認証しない場合（OAuth認証する場合はコメントアウトする）
-my $twit = Net::Twitter::Lite->new() ;
-#
-# 【説明】user_timelineはOAuth認証なしでも取得可。ただしAPI制限が異なる
-# OAuth認証した場合は毎時350リクエストまで（2011年8月現在）
-# OAuth認証しない場合は毎時150リクエストまで（2011年8月現在）
-```
-
-のように改変してください。その場合は
- `consumer_key`,
- `consumer_secret`,
- `access_token`,
- `access_token_secret`
-の値をスクリプト内に記載する必要はありません。
 
 
 関連情報
@@ -107,7 +70,7 @@ my $twit = Net::Twitter::Lite->new() ;
 ライセンス
 --------
 
-Copyright &copy; 2011-2013 Yuki Naito
+Copyright &copy; 2011-2014 Yuki Naito
  ([@meso_cacase](http://twitter.com/meso_cacase))  
 This software is distributed under [modified BSD license]
  (http://www.opensource.org/licenses/bsd-license.php).

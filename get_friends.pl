@@ -8,7 +8,7 @@
 # 省略時は自分自身のフォロー一覧を取得する
 #
 # 必要なモジュール：
-# Net::Twitter::Lite
+# Net::Twitter::Lite::WithAPIv1_1
 # Encode
 #
 # あらかじめ https://dev.twitter.com/apps より登録して、OAuth認証に必要な
@@ -17,12 +17,13 @@
 #
 # 2011-09-13 Yuki Naito (@meso_cacase)
 # 2013-06-12 Yuki Naito (@meso_cacase) Twitter API v1.1に対応
+# 2014-01-23 Yuki Naito (@meso_cacase) Net::Twitter::Lite::WithAPIv1_1に乗り換え
 
 use warnings ;
 use strict ;
-eval 'use Net::Twitter::Lite ; 1' or  # Twitter API用モジュール、ない場合はエラー表示
-	die "ERROR : cannot load Net::Twitter::Lite\n" ;
-eval 'use Encode ; 1' or              # 文字コード変換、ない場合はエラー表示
+eval 'use Net::Twitter::Lite::WithAPIv1_1 ; 1' or  # Twitter APIモジュール
+	die "ERROR : cannot load Net::Twitter::Lite::WithAPIv1_1\n" ;
+eval 'use Encode ; 1' or                           # 文字コード変換
 	die "ERROR : cannot load Encode\n" ;
 
 # OAuth認証
@@ -44,15 +45,12 @@ exit ;
 
 # ====================
 sub twitter_oauth {  # 下記の値は https://dev.twitter.com/apps で取得すること
-$twit = Net::Twitter::Lite->new(
-	apiurl                => 'http://api.twitter.com/1.1',
-	searchapiurl          => 'http://api.twitter.com/1.1/search',
-	search_trends_api_url => 'http://api.twitter.com/1.1',
-	lists_api_url         => 'http://api.twitter.com/1.1',
-	consumer_key          => 'xxxxxxxxxxxxxxxxxxxx',
-	consumer_secret       => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token          => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-	access_token_secret   => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+$twit = Net::Twitter::Lite::WithAPIv1_1->new(
+	consumer_key        => 'xxxxxxxxxxxxxxxxxxxx',
+	consumer_secret     => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token        => 'xxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	access_token_secret => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+	ssl                 => 1
 ) ;
 } ;
 # ====================
