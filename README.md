@@ -72,5 +72,5 @@ $twit = Net::Twitter::Lite::WithAPIv1_1->new(
 
 Copyright &copy; 2011-2014 Yuki Naito
  ([@meso_cacase](http://twitter.com/meso_cacase))  
-This software is distributed under [modified BSD license]
- (http://www.opensource.org/licenses/bsd-license.php).
+This software is distributed under
+[modified BSD license](http://www.opensource.org/licenses/bsd-license.php).
